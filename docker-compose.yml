@@ -1,0 +1,79 @@
+version: '3'
+services:
+
+    hive-hadoop001:
+        image: registry.cn-beijing.aliyuncs.com/dreamhunter/hive-docker:1.0
+        container_name: hive-hadoop001
+        hostname: hive-hadoop001
+        command: sh /opt/start.sh
+        depends_on:
+            - hive_mysql
+            - hive-hadoop002
+            - hive-hadoop003
+        volumes:
+            # hadoop-bin 存放 release 文件
+            - ../hadoop-bin:/opt/hadoop
+            - ./conf/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
+            - ./conf/hadoop-env.sh:/opt/hadoop/etc/hadoop/hadoop-env.sh
+            - ./conf/hdfs-site.xml:/opt/hadoop/etc/hadoop/hdfs-site.xml
+            - ./conf/mapred-site.xml:/opt/hadoop/etc/hadoop/mapred-site.xml
+            - ./conf/workers:/opt/hadoop/etc/hadoop/workers
+            - ./conf/yarn-site.xml:/opt/hadoop/etc/hadoop/yarn-site.xml
+            - ./data/hive-hadoop001data:/opt/hadoopdata
+            - ./start.sh:/opt/start.sh
+            - ./hive:/opt/hive
+            - ./hive-conf/hive-env.sh:/opt/hive/conf/hive-env.sh
+            - ./hive-conf/hive-site.xml:/opt/hive//conf/hive-site.xml
+
+    hive-hadoop002:
+        image: registry.cn-beijing.aliyuncs.com/dreamhunter/hadoop-docker:1.0
+        container_name: hive-hadoop002
+        hostname: hive-hadoop002
+        command: sh /opt/start_slave.sh
+        volumes:
+            - ../hadoop-bin:/opt/hadoop
+            - ./conf/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
+            - ./conf/hadoop-env.sh:/opt/hadoop/etc/hadoop/hadoop-env.sh
+            - ./conf/hdfs-site.xml:/opt/hadoop/etc/hadoop/hdfs-site.xml
+            - ./conf/mapred-site.xml:/opt/hadoop/etc/hadoop/mapred-site.xml
+            - ./conf/workers:/opt/hadoop/etc/hadoop/workers
+            - ./conf/yarn-site.xml:/opt/hadoop/etc/hadoop/yarn-site.xml
+            - ./data/hive-hadoop002data:/opt/hadoopdata
+            - ./start_slave.sh:/opt/start_slave.sh
+
+    hive-hadoop003:
+        image: registry.cn-beijing.aliyuncs.com/dreamhunter/hadoop-docker:1.0
+        container_name: hive-hadoop003
+        hostname: hive-hadoop003
+        command: sh /opt/start_slave.sh
+        volumes:
+            - ../hadoop-bin:/opt/hadoop
+            - ./conf/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
+            - ./conf/hadoop-env.sh:/opt/hadoop/etc/hadoop/hadoop-env.sh
+            - ./conf/hdfs-site.xml:/opt/hadoop/etc/hadoop/hdfs-site.xml
+            - ./conf/mapred-site.xml:/opt/hadoop/etc/hadoop/mapred-site.xml
+            - ./conf/workers:/opt/hadoop/etc/hadoop/workers
+            - ./conf/yarn-site.xml:/opt/hadoop/etc/hadoop/yarn-site.xml
+            - ./data/hive-hadoop003data:/opt/hadoopdata
+            - ./start_slave.sh:/opt/start_slave.sh
+
+    hive_mysql:
+        image: mysql
+        container_name: hive_mysql
+        hostname: hive_mysql
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+        command:
+            --default-authentication-plugin=mysql_native_password
+            --character-set-server=utf8mb4
+            --collation-server=utf8mb4_general_ci
+            --explicit_defaults_for_timestamp=true
+            --lower_case_table_names=1
+        ports:
+            - 3306
+        volumes:
+            - my_mysql_data:/var/lib/mysql
+
+volumes:
+    my_mysql_data:
